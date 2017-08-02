@@ -101,5 +101,6 @@ $RECYCLE.BIN/
 *.indd
 *.prproj
 *.aep
+*.xd
 
 # End of https://www.gitignore.io/api/node,dropbox,prepros,windows
