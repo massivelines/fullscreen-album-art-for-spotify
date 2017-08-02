@@ -94,4 +94,12 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+### Adobe ###
+# Adobe Source Files
+*.psd
+*.ai
+*.indd
+*.prproj
+*.aep
+
 # End of https://www.gitignore.io/api/node,dropbox,prepros,windows
