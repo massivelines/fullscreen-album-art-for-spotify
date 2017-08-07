@@ -103,15 +103,34 @@ function getAlbum() {
   });
 
 }
+
 // get user's top albums
 // save id's in array
 // lookup id's and get album art
 // create grid or bricks, maybe random sizes
-function backgroundArt() {
-  var multiTrack = []; // holds the last that were listened to
 
-  //gets users top tracks and pulls the album id
-  function getArt(callback) {
+
+
+function backgroundArt() {
+
+  // ---------------------------------------------------------
+
+  // function 1
+  //    loop
+  //      gets album id
+  //      add to var
+  //    call 2
+
+  // function 2
+  //    reduces to 20 in array
+  //    loop
+  //      gets album art
+  //      adds to array
+  //    sends to grid
+
+
+  function getArtID(callback) {
+    var multiTrack = [];
     // gets user's recently played
     $.ajax({
       url: 'https://api.spotify.com/v1/me/top/tracks/',
@@ -122,49 +141,46 @@ function backgroundArt() {
         'Authorization': 'Bearer ' + access_token
       },
       success: function(response) {
-        console.log(response);
-        // TODO access second page
+        // console.log(response);
         // pushes the ids of all the tracks into and array
         for (var i = 0; i < response.items.length; i++) {
           multiTrack.push(response.items[i].album.id);
         }
 
         // fillter the array for duplicates
-        multiTrack = multiTrack.filter(function(elem, pos) {
-          return multiTrack.indexOf(elem) == pos;
-        });
+        // multiTrack = multiTrack.filter(function(elem, pos) {
+        //   return multiTrack.indexOf(elem) == pos;
+        // });
 
-        callback();
+        // callback(multiTrack);
+        recently();
       },
       error: function(response) {
         console.log(response);
       }
     });
-  }
 
-  // calls getArt function with a callback to make sure it can get the tracks before processing
-  getArt(function() {
-    var multiTrackImg = []; // holds the multiple Track Images
-
-    //call to return album art url from an album id and pass to multiTrackImg
-    function getArtUrl(holdID) {
-      console.log(holdID);
-      // joins the ids and looks up the tracks
-      holdID = holdID.join(',');
+    function recently() {
       $.ajax({
-        url: 'https://api.spotify.com/v1/albums',
+        url: 'https://api.spotify.com/v1/me/player/recently-played',
         data: {
-          'ids': holdID
+          'limit': 50
         },
         headers: {
           'Authorization': 'Bearer ' + access_token
         },
         success: function(response) {
-          // get the tracks images and push to array multiTrackImg (300px)
-          for (var j = 0; j < response.albums.length; j++) {
-            multiTrackImg.push(response.albums[j].images["1"].url);
+          // pushes the ids of all the tracks into and array
+          for (var i = 0; i < response.items.length; i++) {
+            multiTrack.push(response.items[i].track.album.id);
           }
-          grid(multiTrackImg);
+
+          // fillter the array for duplicates
+          multiTrack = multiTrack.filter(function(elem, pos) {
+            return multiTrack.indexOf(elem) == pos;
+          });
+
+          callback(multiTrack);
         },
         error: function(response) {
           console.log(response);
@@ -172,33 +188,79 @@ function backgroundArt() {
       });
     }
 
-// TODO grid is gitting called twice
+  }
 
-    // determin how many loops to call, pass limit 20
-    if (multiTrack.length > 19) {
-      // console.log(multiTrack);
-      var itt = Math.ceil(multiTrack.length / 20);
+  function getArtUrl(holdID, callback) {
+    var times = 2;
+    var start = 0;
+    var test = 0;
+    var tempARR = [];
+    var idARR = [];
+    var tempStringArr = [];
+    var itt = Math.ceil(holdID.length / 20);
+
+    if (holdID.length > 19) {
+
       for (var i = 0; i < itt; i++) {
-        if (multiTrack.length > 19) {
-          var temp = multiTrack.splice(0, 20);
-          getArtUrl(temp);
+        if (holdID.length > 19) {
+          tempStringArr[i] = holdID.splice(0, 20);
         } else {
-          getArtUrl(multiTrack);
+          tempStringArr[i] = holdID.splice(0, holdID.length);
         }
+        idARR[i] = tempStringArr[i].join(',');
       }
     } else {
-      getArtUrl(multiTrack);
+      idARR[0] = holdID.join(',');
     }
-  });
+
+    console.log(idARR);
 
 
+    function loop(idARR, test, itt, callback) {
+
+      if (test < itt) {
+        $.ajax({
+          url: 'https://api.spotify.com/v1/albums',
+          data: {
+            'ids': idARR[test]
+          },
+          headers: {
+            'Authorization': 'Bearer ' + access_token
+          },
+          success: function(response) {
+            // get the tracks images and push to array multiTrackImg (300px)
+            for (var j = 0; j < response.albums.length; j++) {
+              tempARR.push(response.albums[j].images["1"].url);
+            }
+            test = test + 1;
+            loop(idARR, test, times, callback);
+          },
+          error: function(response) {
+            console.log(response);
+          }
+        });
+      } else {
+        callback(tempARR);
+      }
+    }
+
+    loop(idARR, test, itt, function(reData) {
+      grid(reData);
+    });
+
+  }
+
+
+  getArtID(getArtUrl);
+
+  // -------------------------------------------------------------
 
   // create grid using masonry.js
   // https://masonry.desandro.com/
   function grid(multiTrackImg) {
     var currentWidth = window.innerWidth;
     var currentHeight = window.innerHeight;
-    var biggestImgSize = 300;
+    var biggestImgSize = 75;
     var columns = Math.ceil(currentWidth / biggestImgSize);
     var rows = Math.ceil(currentHeight / biggestImgSize);
     var marginLeft = ((columns * biggestImgSize) - currentWidth) / 2;
@@ -215,26 +277,13 @@ function backgroundArt() {
 
     $('#container').css(containerStyles);
 
-    // TODO filter array for duplicate ablumes, recently-played pulls from tracks
 
-    //  shuffles the array and reasignes it
-    //  anonymous self-invoking function so all vars are contained
-    multiTrackImg = (function(imageArray) {
 
-      // suffles the multiTrackImg array
-      var ran, temp, i;
-      for (i = imageArray.length; i; i--) {
-        ran = Math.floor(Math.random() * i);
-        temp = imageArray[i - 1];
-        imageArray[i - 1] = imageArray[ran];
-        imageArray[ran] = temp;
-      }
-      return imageArray;
-    })(multiTrackImg);
 
     // corresponds with the same css styles controling size
     function randomSize() {
       var sizes = {
+        // 1: 'img2' for testing
         1: 'img1',
         2: 'img2',
         3: 'img3'
@@ -245,10 +294,29 @@ function backgroundArt() {
     }
 
     // appends images
-    for (var i = 0; i < multiTrackImg.length; i++) {
-      var px = randomSize();
-      $('.grid').append('<div class="grid-item ' + px + '"><img src="' + multiTrackImg[i] + '"></div>');
+    for (var j = 0; j < 2; j++) {
+
+      //  shuffles the array and reasignes it
+      //  anonymous self-invoking function so all vars are contained
+      multiTrackImg = (function(imageArray) {
+
+        // suffles the multiTrackImg array
+        var ran, temp, i;
+        for (i = imageArray.length; i; i--) {
+          ran = Math.floor(Math.random() * i);
+          temp = imageArray[i - 1];
+          imageArray[i - 1] = imageArray[ran];
+          imageArray[ran] = temp;
+        }
+        return imageArray;
+      })(multiTrackImg);
+
+      for (var i = 0; i < multiTrackImg.length; i++) {
+        var px = randomSize();
+        $('.grid').append('<div class="grid-item ' + px + '"><img src="' + multiTrackImg[i] + '"></div>');
+      }
     }
+
 
     // starts packery after all the images are loaded
     var $grid = $('.grid').imagesLoaded(function() {
@@ -256,6 +324,7 @@ function backgroundArt() {
         // options...
         percentPosition: true,
         itemSelector: '.grid-item',
+        columnWidth: 75,
         gutter: 0
       });
     });
