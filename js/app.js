@@ -24,10 +24,10 @@ function spotifyLogin() {
     var url = 'https://accounts.spotify.com/authorize?client_id=' + client_id +
       '&redirect_uri=' + encodeURIComponent(redirect_uri) +
       '&scope=' + encodeURIComponent(scopes.join(' ')) +
-      '&response_type=token' +
-      //adds approve everytime
-      // TODO: remove
-      '&show_dialog=true';
+      '&response_type=token';
+    //adds approve everytime
+    // TODO: remove
+    // '&show_dialog=true';
 
     // passes the url to the window
     window.location = url;
@@ -43,8 +43,8 @@ function spotifyLogin() {
     if (hashSplit[0][0] == 'access_token') {
       access_token = hashSplit[0][1];
       $("#login").fadeOut('slow');
-      // getAlbum();
-      // var refresh = setInterval(getAlbum, 500);
+      getAlbum();
+      var refresh = setInterval(getAlbum, 500);
       backgroundArt();
       loggedin = true;
     }
@@ -88,16 +88,25 @@ function getAlbum() {
         console.log("commercial");
       } else {
         var playing = {
-          artist: response.item.album.artists["0"].name,
-          album: response.item.album.name,
-          track: response.item.name,
-          albumImg: response.item.album.images["0"].url
+          // artist: response.item.album.artists["0"].name,
+          // album: response.item.album.name,
+          // track: response.item.name,
+          // albumImg: response.item.album.images["0"].url
         };
 
         if (holdAlbumImg != playing.albumImg) {
-          $("#cover").css("background-image", "url('" + playing.albumImg + "')");
-          holdAlbumImg = playing.albumImg;
+          // $("#cover").css("background-image", "url('" + playing.albumImg + "')");
+          // holdAlbumImg = playing.albumImg;
         }
+      }
+    },
+    error: function(response) {
+      if (response.status == 401) {
+        console.log(true);
+        // TODO change this to stop album check and popup spotify login
+        window.location.replace('http://localhost:7880/');
+      } else {
+        // console.log(response);
       }
     }
   });
@@ -213,7 +222,7 @@ function backgroundArt() {
       idARR[0] = holdID.join(',');
     }
 
-    console.log(idARR);
+    // console.log(idARR);
 
 
     function loop(idARR, test, itt, callback) {
@@ -258,78 +267,56 @@ function backgroundArt() {
   // create grid using masonry.js
   // https://masonry.desandro.com/
   function grid(multiTrackImg) {
+    console.log(multiTrackImg);
     var currentWidth = window.innerWidth;
     var currentHeight = window.innerHeight;
-    var biggestImgSize = 75;
-    var columns = Math.ceil(currentWidth / biggestImgSize);
-    var rows = Math.ceil(currentHeight / biggestImgSize);
-    var marginLeft = ((columns * biggestImgSize) - currentWidth) / 2;
-    var marginTop = ((rows * biggestImgSize) - currentHeight) / 2;
-    // console.log(currentWidth +" x " +currentHeight);
-    // console.log(columns+" x "+rows);
-
-    var containerStyles = {
-      width: columns * biggestImgSize,
-      height: rows * biggestImgSize,
-      top: -marginTop,
-      left: -marginLeft
-    };
-
-    $('#container').css(containerStyles);
 
 
+    // $('#container').css(containerStyles);
+    // $('.grid').css(containerStyles);
 
+    //  shuffles the array and reasignes it
+    //  anonymous self-invoking function so all vars are contained
+    multiTrackImg = (function(imageArray) {
 
-    // corresponds with the same css styles controling size
-    function randomSize() {
-      var sizes = {
-        // 1: 'img2' for testing
-        1: 'img1',
-        2: 'img2',
-        3: 'img3'
-      };
-      // randomly picks size
-      var random = Math.floor((Math.random() * Object.keys(sizes).length) + 1);
-      return sizes[random];
-    }
+      // suffles the multiTrackImg array
+      var ran, temp, i;
+      for (i = imageArray.length; i; i--) {
+        ran = Math.floor(Math.random() * i);
+        temp = imageArray[i - 1];
+        imageArray[i - 1] = imageArray[ran];
+        imageArray[ran] = temp;
+      }
+      return imageArray;
+    })(multiTrackImg);
+
 
     // appends images
-    for (var j = 0; j < 2; j++) {
-
-      //  shuffles the array and reasignes it
-      //  anonymous self-invoking function so all vars are contained
-      multiTrackImg = (function(imageArray) {
-
-        // suffles the multiTrackImg array
-        var ran, temp, i;
-        for (i = imageArray.length; i; i--) {
-          ran = Math.floor(Math.random() * i);
-          temp = imageArray[i - 1];
-          imageArray[i - 1] = imageArray[ran];
-          imageArray[ran] = temp;
-        }
-        return imageArray;
-      })(multiTrackImg);
-
-      for (var i = 0; i < multiTrackImg.length; i++) {
-        var px = randomSize();
-        $('.grid').append('<div class="grid-item ' + px + '"><img src="' + multiTrackImg[i] + '"></div>');
-      }
+    for (var i = 0; i < multiTrackImg.length; i++) {
+      $('.grid').append('<div class="grid-item"><img src="' + multiTrackImg[i] + '"></div>');
     }
+
 
 
     // starts packery after all the images are loaded
-    var $grid = $('.grid').imagesLoaded(function() {
-      $grid.packery({
-        // options...
-        percentPosition: true,
-        itemSelector: '.grid-item',
-        columnWidth: 75,
-        gutter: 0
+    $('.grid').imagesLoaded()
+      .done(function(instance) {
+        console.log('all images successfully loaded');
+        $(".grid").mason({
+          itemSelector: '.grid-item',
+		      ratio: 1,
+		      sizes: [
+		        [1,1],
+		        [2,2],
+		        [3,3]
+		      ],
+						columns: [
+						[0,1680,20],
+					],
+		      layout: 'fluid',
+		gutter: 2
+        });
       });
-    });
-
-
   }
 
 }
