@@ -137,69 +137,64 @@ function backgroundArt() {
   //      adds to array
   //    sends to grid
 
+  //calls getArtID then sends multiTrack to getArtUrl
+  getArtID(getArtUrl);
 
   function getArtID(callback) {
-    var multiTrack = [];
-    // gets user's recently played
-    $.ajax({
-      url: 'https://api.spotify.com/v1/me/top/tracks/',
-      data: {
-        'limit': 50
-      },
-      headers: {
-        'Authorization': 'Bearer ' + access_token
-      },
-      success: function(response) {
-        // console.log(response);
-        // pushes the ids of all the tracks into and array
-        for (var i = 0; i < response.items.length; i++) {
-          multiTrack.push(response.items[i].album.id);
-        }
 
-        // fillter the array for duplicates
-        // multiTrack = multiTrack.filter(function(elem, pos) {
-        //   return multiTrack.indexOf(elem) == pos;
-        // });
-
-        // callback(multiTrack);
-        recently();
-      },
-      error: function(response) {
-        console.log(response);
-      }
-    });
-
-    function recently() {
+    //.when compleates only after both ajax calls pass
+    $.when(
       $.ajax({
-        url: 'https://api.spotify.com/v1/me/player/recently-played',
+        url: 'https://api.spotify.com/v1/me/top/tracks/',
         data: {
           'limit': 50
         },
         headers: {
           'Authorization': 'Bearer ' + access_token
         },
-        success: function(response) {
-          // pushes the ids of all the tracks into and array
-          for (var i = 0; i < response.items.length; i++) {
-            multiTrack.push(response.items[i].track.album.id);
-          }
-
-          // fillter the array for duplicates
-          multiTrack = multiTrack.filter(function(elem, pos) {
-            return multiTrack.indexOf(elem) == pos;
-          });
-
-          callback(multiTrack);
-        },
+        success: function(response) {},
         error: function(response) {
           console.log(response);
         }
+      }),
+      $.ajax({
+        url: 'https://api.spotify.com/v1/me/player/recently-played',
+        data: {
+          'limit': 1
+        },
+        headers: {
+          'Authorization': 'Bearer ' + access_token
+        },
+        success: function(response) {},
+        error: function(response) {
+          console.log(response);
+        }
+      })
+      //done pushes all ids together and filters for duplicates then callback
+    ).done(function(arr1, arr2) {
+
+      var multiTrack = [];
+      // pushes the ids from top tracks into and array
+      for (var i = 0; i < arr1["0"].items.length; i++) {
+        multiTrack.push(arr1["0"].items[i].album.id);
+      }
+      // pushes the ids from last played into and array
+      for (var j = 0; j < arr2["0"].items.length; j++) {
+        multiTrack.push(arr2["0"].items[j].track.album.id);
+      }
+
+      // fillter the array for duplicates
+      multiTrack = multiTrack.filter(function(elem, pos) {
+        return multiTrack.indexOf(elem) == pos;
       });
-    }
+      callback(multiTrack);
+
+    });
 
   }
 
-  function getArtUrl(holdID, callback) {
+  function getArtUrl(multiTrack, callback) {
+    holdID = multiTrack;
     var times = 2;
     var start = 0;
     var test = 0;
@@ -209,7 +204,6 @@ function backgroundArt() {
     var itt = Math.ceil(holdID.length / 20);
 
     if (holdID.length > 19) {
-
       for (var i = 0; i < itt; i++) {
         if (holdID.length > 19) {
           tempStringArr[i] = holdID.splice(0, 20);
@@ -222,12 +216,8 @@ function backgroundArt() {
       idARR[0] = holdID.join(',');
     }
 
-    // console.log(idARR);
-
-
     function loop(idARR, test, itt, callback) {
-
-      if (test < itt) {
+      if (test < idARR.length) {
         $.ajax({
           url: 'https://api.spotify.com/v1/albums',
           data: {
@@ -239,7 +229,7 @@ function backgroundArt() {
           success: function(response) {
             // get the tracks images and push to array multiTrackImg (300px)
             for (var j = 0; j < response.albums.length; j++) {
-              tempARR.push(response.albums[j].images["1"].url);
+              tempARR.push(response.albums[j].images["0"].url);
             }
             test = test + 1;
             loop(idARR, test, times, callback);
@@ -254,41 +244,57 @@ function backgroundArt() {
     }
 
     loop(idARR, test, itt, function(reData) {
+
+      //  shuffles the array and reasignes it
+      //  anonymous self-invoking function so all vars are contained
+      reData = (function(imageArray) {
+
+        // suffles the reData array
+        var ran, temp, i;
+        for (i = imageArray.length; i; i--) {
+          ran = Math.floor(Math.random() * i);
+          temp = imageArray[i - 1];
+          imageArray[i - 1] = imageArray[ran];
+          imageArray[ran] = temp;
+        }
+        return imageArray;
+      })(reData);
+
       grid(reData);
     });
 
   }
 
 
-  getArtID(getArtUrl);
 
   // -------------------------------------------------------------
 
   // create grid using masonry.js
   // https://masonry.desandro.com/
   function grid(multiTrackImg) {
-    console.log(multiTrackImg);
+    // console.log(multiTrackImg);
     var currentWidth = window.innerWidth;
     var currentHeight = window.innerHeight;
 
+    function random(min, max) {
+      return Math.floor(Math.random() * (max - min)) + min;
+    }
 
-    // $('#container').css(containerStyles);
-    // $('.grid').css(containerStyles);
 
-    //  shuffles the array and reasignes it
-    //  anonymous self-invoking function so all vars are contained
-    multiTrackImg = (function(imageArray) {
+    var columnSize = currentHeight/6;
+    // var columnSize = 184; //smallest size for image 75px
+    var numberOfColumns = Math.ceil(currentWidth / columnSize);
+    console.log(currentHeight);
 
-      // suffles the multiTrackImg array
-      var ran, temp, i;
-      for (i = imageArray.length; i; i--) {
-        ran = Math.floor(Math.random() * i);
-        temp = imageArray[i - 1];
-        imageArray[i - 1] = imageArray[ran];
-        imageArray[ran] = temp;
-      }
-      return imageArray;
-    })(multiTrackImg);
+    var newWidth = columnSize * numberOfColumns;
+    var gridStyles = {
+      'width': newWidth+'px',
+      'left': -random(0, (newWidth - currentWidth) / 2) + 'px'
+    };
+
+    $('#container').css(gridStyles);
+
+
 
 
     // appends images
@@ -296,26 +302,35 @@ function backgroundArt() {
       $('.grid').append('<div class="grid-item"><img src="' + multiTrackImg[i] + '"></div>');
     }
 
-
+    // TODO test height of grid, if < screen height kill mason reload
+    //currently set at 600px images and need to change columnSize, make response
+    // TODO use last played 50 tracks as filler items, and posiably aimate some to fade over first array
 
     // starts packery after all the images are loaded
     $('.grid').imagesLoaded()
       .done(function(instance) {
-        console.log('all images successfully loaded');
+        // console.log('all images successfully loaded');
         $(".grid").mason({
           itemSelector: '.grid-item',
-		      ratio: 1,
-		      sizes: [
-		        [1,1],
-		        [2,2],
-		        [3,3]
-		      ],
-						columns: [
-						[0,1680,20],
-					],
-		      layout: 'fluid',
-		gutter: 2
+          ratio: 1,
+          sizes: [
+            [2, 2],
+            [1, 1],
+          ],
+          columns: [
+            [0, 3000, numberOfColumns],
+          ],
+          filler: {
+            itemSelector: '.grid-item',
+            filler_class: 'mason_filler',
+            keepDataAndEvents: false
+          },
+          randomSizes: true,
+          randomFillers: true,
+          layout: 'fluid',
+          gutter: 2
         });
+        $('#container').css('top', -random(0, $('.grid').height()-currentHeight) / 2  + 'px');
       });
   }
 
