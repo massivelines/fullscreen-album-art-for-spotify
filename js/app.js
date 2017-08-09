@@ -16,6 +16,13 @@ function spotifyLogin() {
   var client_id = 'e2087600e83c43e6844e6babfd3c3a5c'; // Your client id
   var redirect_uri = 'http://localhost:7880/'; // Your redirect uri
 
+  // TODO setup node on https://www.heroku.com/ for auth0
+  // TODO figure out a way to bring token from heroku to js page
+  // https://auth0.com/blog/ten-things-you-should-know-about-tokens-and-cookies/
+  // https://stackoverflow.com/questions/38957991/proper-way-to-store-my-own-access-tokens-secrets-on-server
+  // https://github.com/JMPerez/spotify-player
+  // Import the script https://spotify-player.herokuapp.com/spotify-player.js. Now you can log the user in and listen to updates on playback
+
   //create the login url
   function getLoginURL() {
     // permissions needed
@@ -160,7 +167,7 @@ function backgroundArt() {
       $.ajax({
         url: 'https://api.spotify.com/v1/me/player/recently-played',
         data: {
-          'limit': 1
+          'limit': 50
         },
         headers: {
           'Authorization': 'Bearer ' + access_token
@@ -171,22 +178,46 @@ function backgroundArt() {
         }
       })
       //done pushes all ids together and filters for duplicates then callback
-    ).done(function(arr1, arr2) {
-
+    ).done(function(top50, recentlyPlayed) {
+      var top50Arr = [];
+      var recentlyPlayedArr = [];
+      var topLength = top50Arr.length;
+      var recentlyLength = recentlyPlayedArr.length;
       var multiTrack = [];
+
+
       // pushes the ids from top tracks into and array
-      for (var i = 0; i < arr1["0"].items.length; i++) {
-        multiTrack.push(arr1["0"].items[i].album.id);
+      for (var i = 0; i < top50["0"].items.length; i++) {
+        top50Arr.push(top50["0"].items[i].album.id);
       }
       // pushes the ids from last played into and array
-      for (var j = 0; j < arr2["0"].items.length; j++) {
-        multiTrack.push(arr2["0"].items[j].track.album.id);
+      for (var j = 0; j < recentlyPlayed["0"].items.length; j++) {
+        recentlyPlayedArr.push(recentlyPlayed["0"].items[j].track.album.id);
       }
+
+      // combines array for filtering
+      multiTrack = top50Arr.concat(recentlyPlayedArr);
 
       // fillter the array for duplicates
       multiTrack = multiTrack.filter(function(elem, pos) {
         return multiTrack.indexOf(elem) == pos;
       });
+
+
+      // TODO do I want to split to top and recently played for bg?
+      // var holdForResplit = recentlyPlayedArr[0];
+      // var splitLoc = multiTrack.indexOf(holdForResplit);
+      //
+      // top50Arr = multiTrack.splice(0, splitLoc);
+      // recentlyPlayedArr = multiTrack;
+      // console.log(top50Arr);
+      // console.log(holdForResplit);
+      // console.log(splitLoc);
+      // console.log(recentlyPlayedArr);
+
+
+
+
       callback(multiTrack);
 
     });
@@ -284,7 +315,7 @@ function backgroundArt() {
     var columnSize = currentHeight/6;
     // var columnSize = 184; //smallest size for image 75px
     var numberOfColumns = Math.ceil(currentWidth / columnSize);
-    console.log(currentHeight);
+    // console.log(currentHeight);
 
     var newWidth = columnSize * numberOfColumns;
     var gridStyles = {
@@ -296,11 +327,16 @@ function backgroundArt() {
 
 
 
+    var fillers = multiTrackImg.splice(0, Math.floor(multiTrackImg.length/2));
+    console.log(fillers);
+    console.log(multiTrackImg);
+
 
     // appends images
     for (var i = 0; i < multiTrackImg.length; i++) {
       $('.grid').append('<div class="grid-item"><img src="' + multiTrackImg[i] + '"></div>');
     }
+
 
     // TODO test height of grid, if < screen height kill mason reload
     //currently set at 600px images and need to change columnSize, make response
@@ -330,6 +366,7 @@ function backgroundArt() {
           layout: 'fluid',
           gutter: 2
         });
+        // console.log($('.grid').height());
         $('#container').css('top', -random(0, $('.grid').height()-currentHeight) / 2  + 'px');
       });
   }
