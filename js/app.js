@@ -92,8 +92,12 @@ function getAlbum() {
       if (response.item == null) {
         // TODO cange to error
         // TODO: add in some image or item
+        $('#cover_background').css('opacity', 0);
         console.log("commercial");
       } else {
+        if ($('#cover_background').css('opacity')==0) {
+          $('#cover_background').css('opacity', 1);
+        }
         var playing = {
           artist: response.item.album.artists["0"].name,
           album: response.item.album.name,
@@ -391,6 +395,7 @@ function backgroundArt() {
           getAlbum();
           $('#cover_background').css('opacity', 1);
           var refresh = setInterval(getAlbum, 500);
+
         });
     });
 

@@ -92,5 +92,7 @@
   width: 83vh;
   background-repeat: no-repeat;
   background-size: cover;
+  /*background: no-repeat cover;*/
   box-shadow: inset 0px 0px 30px 5px hsla(0, 0%, 0%, .4);
+  transition: background .5s ease-in-out;
 }
