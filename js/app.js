@@ -50,8 +50,8 @@ function spotifyLogin() {
     if (hashSplit[0][0] == 'access_token') {
       access_token = hashSplit[0][1];
       $("#login").fadeOut('slow');
-      getAlbum();
-      var refresh = setInterval(getAlbum, 500);
+      // getAlbum();
+      // var refresh = setInterval(getAlbum, 500);
       backgroundArt();
       loggedin = true;
     }
@@ -95,15 +95,15 @@ function getAlbum() {
         console.log("commercial");
       } else {
         var playing = {
-          // artist: response.item.album.artists["0"].name,
-          // album: response.item.album.name,
-          // track: response.item.name,
-          // albumImg: response.item.album.images["0"].url
+          artist: response.item.album.artists["0"].name,
+          album: response.item.album.name,
+          track: response.item.name,
+          albumImg: response.item.album.images["0"].url
         };
 
         if (holdAlbumImg != playing.albumImg) {
-          // $("#cover").css("background-image", "url('" + playing.albumImg + "')");
-          // holdAlbumImg = playing.albumImg;
+          $("#cover").css("background-image", "url('" + playing.albumImg + "')");
+          holdAlbumImg = playing.albumImg;
         }
       }
     },
@@ -326,49 +326,74 @@ function backgroundArt() {
     $('#container').css(gridStyles);
 
 
+    function appendImages(callback) {
+      var fillers = multiTrackImg.splice(0, Math.floor(multiTrackImg.length/2));
 
-    var fillers = multiTrackImg.splice(0, Math.floor(multiTrackImg.length/2));
-    console.log(fillers);
-    console.log(multiTrackImg);
+      // appends images
+      $.each(multiTrackImg, function () {
+        $('.grid').append('<div class="grid-item" style="background-image: url('+this+'); background-repeat: no-repeat; background-size:cover;"></div>');
+      });
+      $.each(fillers, function () {
+        $('.hidden').append('<div class="fillers" style="background-image: url('+this+'); background-repeat: no-repeat; background-size:cover;"></div>');
+      });
 
-
-    // appends images
-    for (var i = 0; i < multiTrackImg.length; i++) {
-      $('.grid').append('<div class="grid-item"><img src="' + multiTrackImg[i] + '"></div>');
+      callback();
     }
+
 
 
     // TODO test height of grid, if < screen height kill mason reload
     //currently set at 600px images and need to change columnSize, make response
     // TODO use last played 50 tracks as filler items, and posiably aimate some to fade over first array
 
-    // starts packery after all the images are loaded
-    $('.grid').imagesLoaded()
-      .done(function(instance) {
-        // console.log('all images successfully loaded');
-        $(".grid").mason({
-          itemSelector: '.grid-item',
-          ratio: 1,
-          sizes: [
-            [2, 2],
-            [1, 1],
-          ],
-          columns: [
-            [0, 3000, numberOfColumns],
-          ],
-          filler: {
+    appendImages(function() {
+      // starts packery after all the images are loaded
+      $('.grid').imagesLoaded()
+        .done(function(instance) {
+          // console.log('all images successfully loaded');
+          $(".grid").mason({
             itemSelector: '.grid-item',
-            filler_class: 'mason_filler',
-            keepDataAndEvents: false
-          },
-          randomSizes: true,
-          randomFillers: true,
-          layout: 'fluid',
-          gutter: 2
+            ratio: 1,
+            sizes: [
+              [2, 2],
+              [1, 1],
+            ],
+            columns: [
+              [0, 3000, numberOfColumns],
+            ],
+            filler: {
+              itemSelector: '.fillers',
+              filler_class: 'mason_filler',
+              keepDataAndEvents: false
+            },
+            layout: 'fluid',
+            gutter: 2
+          });
+          $('#container').css('top', -random(0, $('.grid').height()-currentHeight) / 2  + 'px');
+        }).done(function () {
+
+          var artDivs = $(".grid > div").get();
+          var artDivsLength = artDivs.length;
+
+          function opacityLoop() {
+            if( artDivsLength > 0){
+              setTimeout( function () {
+                var loc = random(0, artDivsLength);
+                $(artDivs[loc]).css('opacity', 1);
+                artDivs.splice(loc, 1);
+                artDivsLength--;
+                opacityLoop();
+              } , 20);
+            }
+          }
+          opacityLoop();
+        }).done(function () {
+          getAlbum();
+          $('#cover_background').css('opacity', 1);
+          var refresh = setInterval(getAlbum, 500);
         });
-        // console.log($('.grid').height());
-        $('#container').css('top', -random(0, $('.grid').height()-currentHeight) / 2  + 'px');
-      });
+    });
+
   }
 
 }
