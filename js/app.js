@@ -26,7 +26,7 @@ function spotifyLogin() {
   //create the login url
   function getLoginURL() {
     // permissions needed
-    var scopes = ['user-read-email', 'user-read-currently-playing', 'user-read-playback-state', 'user-read-recently-played', 'user-top-read'];
+    var scopes = ['user-read-email', 'user-read-currently-playing', 'user-read-playback-state', 'user-read-recently-played', 'user-top-read', 'user-read-private'];
     // url
     var url = 'https://accounts.spotify.com/authorize?client_id=' + client_id +
       '&redirect_uri=' + encodeURIComponent(redirect_uri) +
@@ -50,9 +50,8 @@ function spotifyLogin() {
     if (hashSplit[0][0] == 'access_token') {
       access_token = hashSplit[0][1];
       $("#login").fadeOut('slow');
-      // getAlbum();
-      // var refresh = setInterval(getAlbum, 500);
       backgroundArt();
+      profile();
       loggedin = true;
     }
   }
@@ -65,6 +64,38 @@ function spotifyLogin() {
     getLoginURL();
   }, false);
 }
+
+function profile() {
+  $.ajax({
+    url: 'https://api.spotify.com/v1/me',
+    data: {
+      'limit': 50
+    },
+    headers: {
+      'Authorization': 'Bearer ' + access_token
+    },
+    success: function(response) {
+      console.log(response);
+      var user = {
+        name: response.display_name,
+        email: response.email,
+        profileImg: response.images["0"].url,
+        product: response.product
+      };
+      $('#profileImg').html('<img src="'+user.profileImg+'">');
+      $('#user').html('<h1>Logged in as '+user.name+'</h1>');
+      $('#email').text('Email: '+user.email);
+      $('#product').text('Account Type: '+user.product);
+    },
+    error: function(response) {
+      console.log(response);
+    }
+  });
+}
+
+
+
+
 
 
 spotifyLogin();
@@ -89,24 +120,36 @@ function getAlbum() {
       'Authorization': 'Bearer ' + access_token
     },
     success: function(response) {
+
+      // if a commercial is on
       if (response.item == null) {
         // TODO cange to error
         // TODO: add in some image or item
         $('#cover_background').css('opacity', 0);
+        $('#track').html('');
+        $('#artist').html('');
+        $('#album').html('');
         console.log("commercial");
       } else {
-        if ($('#cover_background').css('opacity')==0) {
+        if ($('#cover_background').css('opacity') == 0) {
           $('#cover_background').css('opacity', 1);
         }
         var playing = {
           artist: response.item.album.artists["0"].name,
           album: response.item.album.name,
           track: response.item.name,
-          albumImg: response.item.album.images["0"].url
+          albumImg: response.item.album.images["0"].url,
+          artistURL: response.item.artists["0"].external_urls.spotify,
+          albumURL: response.item.album.external_urls.spotify,
+          trackURL: response.item.external_urls.spotify
         };
-
+        // TODO when changin tracks, it flashes when gets new album art
         if (holdAlbumImg != playing.albumImg) {
-          $("#cover").css("background-image", "url('" + playing.albumImg + "')");
+          // console.log(response);
+          $('#cover').css("background-image", "url('" + playing.albumImg + "')");
+          $('#track').html('<a href=' + playing.trackURL + ' target="_blank">' + playing.track + '</a>');
+          $('#artist').html('<a href=' + playing.artistURL + ' target="_blank">' + playing.artist + '</a>');
+          $('#album').html('<a href=' + playing.albumURL + ' target="_blank">' + playing.album + '</a>');
           holdAlbumImg = playing.albumImg;
         }
       }
@@ -316,14 +359,14 @@ function backgroundArt() {
     }
 
 
-    var columnSize = currentHeight/6;
+    var columnSize = currentHeight / 6;
     // var columnSize = 184; //smallest size for image 75px
     var numberOfColumns = Math.ceil(currentWidth / columnSize);
     // console.log(currentHeight);
 
     var newWidth = columnSize * numberOfColumns;
     var gridStyles = {
-      'width': newWidth+'px',
+      'width': newWidth + 'px',
       'left': -random(0, (newWidth - currentWidth) / 2) + 'px'
     };
 
@@ -331,14 +374,14 @@ function backgroundArt() {
 
 
     function appendImages(callback) {
-      var fillers = multiTrackImg.splice(0, Math.floor(multiTrackImg.length/2));
+      var fillers = multiTrackImg.splice(0, Math.floor(multiTrackImg.length / 2));
 
       // appends images
-      $.each(multiTrackImg, function () {
-        $('.grid').append('<div class="grid-item" style="background-image: url('+this+'); background-repeat: no-repeat; background-size:cover;"></div>');
+      $.each(multiTrackImg, function() {
+        $('.grid').append('<div class="grid-item" style="background-image: url(' + this + '); background-repeat: no-repeat; background-size:cover;"></div>');
       });
-      $.each(fillers, function () {
-        $('.hidden').append('<div class="fillers" style="background-image: url('+this+'); background-repeat: no-repeat; background-size:cover;"></div>');
+      $.each(fillers, function() {
+        $('.hidden').append('<div class="fillers" style="background-image: url(' + this + '); background-repeat: no-repeat; background-size:cover;"></div>');
       });
 
       callback();
@@ -373,28 +416,53 @@ function backgroundArt() {
             layout: 'fluid',
             gutter: 2
           });
-          $('#container').css('top', -random(0, $('.grid').height()-currentHeight) / 2  + 'px');
-        }).done(function () {
-
+          $('#container').css('top', -random(0, $('.grid').height() - currentHeight) / 2 + 'px');
+        }).done(function() {
+          // randomizes the fade in on the grid items
           var artDivs = $(".grid > div").get();
           var artDivsLength = artDivs.length;
 
           function opacityLoop() {
-            if( artDivsLength > 0){
-              setTimeout( function () {
+            if (artDivsLength > 0) {
+              setTimeout(function() {
                 var loc = random(0, artDivsLength);
                 $(artDivs[loc]).css('opacity', 1);
                 artDivs.splice(loc, 1);
                 artDivsLength--;
                 opacityLoop();
-              } , 20);
+              }, 20);
             }
           }
           opacityLoop();
-        }).done(function () {
+        }).done(function() {
+
+          // starts getAlbum art with interval and fades it in
           getAlbum();
           $('#cover_background').css('opacity', 1);
           var refresh = setInterval(getAlbum, 500);
+
+        }).done(function() {
+          // TODO when commercial dont show details
+          // adds a timer that shows the track info on a mousemove and delays it until all art it loaded
+          setTimeout(function() {
+            var timer = null;
+            $(document).mousemove(function() {
+              clearTimeout(timer);
+              $('#details').css('opacity', 1);
+              $('#info').css('opacity', 1);
+              $('#spotify').css('opacity', 1);
+              i = setTimeout(function() {
+                $('#details').css('opacity', 0);
+                $('#info').css('opacity', 0);
+                $('#spotify').css('opacity', 0.4);
+              }, 10000);
+            }).mouseleave(function() {
+              clearTimeout(timer);
+              $('#details').css('opacity', 0);
+              $('#info').css('opacity', 0);
+              $('#spotify').css('opacity', 0.4);
+            });
+          }, 5000);
 
         });
     });
@@ -402,5 +470,7 @@ function backgroundArt() {
   }
 
 }
+
+
 
 $(document).foundation();

@@ -6,8 +6,10 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spotify Album Covers</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" href="css/foundation.css">
   <link rel="stylesheet" href="css/app.css">
+
 </head>
 
 <body>
@@ -34,6 +36,45 @@
           <div id="cover"></div>
         </div>
       </div>
+      <div id="spotify" data-open="profile">
+        <img src="img\spotify icon\Spotify_Icon_CMYK_White.png" alt="User Account Information">
+      </div>
+      <div id="details">
+        <div id="info">
+          <div id="track"></div>
+          <div id="artist"></div>
+          <div id="album"></div>
+        </div>
+        <!-- <div id="controls">
+          <i class="material-icons">skip_previous</i>
+          <i class="material-icons">play_circle_outline</i>
+          <i class="material-icons">skip_next</i>
+        </div> -->
+      </div>
+      <div id="profile" class="reveal" data-reveal>
+        <div id="user">
+        </div>
+        <div id="profileInfo">
+          <div id="profileImg">
+          </div>
+          <div id="profileDetails">
+            <div id="email">
+            </div>
+            <div id="product">
+            </div>
+            <div><sub>Open means a free spotify account.</sub>
+            </div>
+            <button type="button" class="button">Logout</button>
+          </div>
+
+        </div>
+        <div id="about">
+          put info about github project here
+        </div>
+        <button class="close-button" data-close aria-label="Close modal" type="button">
+    <span aria-hidden="true">&times;</span>
+  </button>
+      </div>
     </div>
   </div>
   <div class="hidden">
@@ -43,6 +84,7 @@
   <script src="js/vendor/jquery.js"></script>
   <script src="js/vendor/what-input.js"></script>
   <script src="js/vendor/foundation.js"></script>
+
   <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.js"></script>
   <script src="https://rawgit.com/DrewDahlman/Mason/master/dist/mason.js"></script>
   <!-- <script src="https://unpkg.com/packery@2/dist/packery.pkgd.js"></script> -->
