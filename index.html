@@ -14,11 +14,20 @@
 
 <body>
 
-  <!-- login model -->
-  <div id="login" class="card login_card">
-    <div class="">
-      <h1>Displays the Album Art of the current playing track</h1>
-      <button id="login-button" class="button">Log in with Spotify</button>
+  <!-- login modal -->
+  <div id="login" class="callout">
+    <div class="text">
+      <h1>Fullscreen Album Art for Spotify</h1>
+      <div class="info">
+        This app gets your currently playing track and displays the album art. The background is randomly composed of your top 50 most listened to songs and last 50 songs you have listened to.
+      </div>
+      <div class="shortcut">
+        F11 to toggle fullscreen.
+      </div>
+      <div class='more-info'>
+        For more information on the app click the spotify logo in the top right.
+      </div>
+      <button type="button" id="login-button" class="button">Log in with Spotify</button>
     </div>
     <div id="loggedin">
       <div id="user-profile">
@@ -30,17 +39,27 @@
 
   <div id="wrapper">
     <div id="container">
+
+      <!-- background artwork -->
       <div class="grid"></div>
+
+      <!-- cover artwork -->
       <div id="cover_container">
         <div id="cover_background">
-          <div id="cover"></div>
+          <div id="previousCover">
+            <div id="cover"></div>
+          </div>
         </div>
       </div>
-      <div id="spotify" data-open="profile">
+
+      <!-- spotify icon -->
+      <div id="spotify" data-open="information">
         <img src="img\spotify icon\Spotify_Icon_CMYK_White.png" alt="User Account Information">
       </div>
-      <div id="details">
-        <div id="info">
+
+      <!-- track details -->
+      <div id="track-details">
+        <div id="track-text">
           <div id="track"></div>
           <div id="artist"></div>
           <div id="album"></div>
@@ -51,27 +70,51 @@
           <i class="material-icons">skip_next</i>
         </div> -->
       </div>
-      <div id="profile" class="reveal" data-reveal>
-        <div id="user">
-        </div>
-        <div id="profileInfo">
-          <div id="profileImg">
-          </div>
-          <div id="profileDetails">
-            <div id="email">
-            </div>
-            <div id="product">
-            </div>
-            <div><sub>Open means a free spotify account.</sub>
-            </div>
-            <button type="button" class="button">Logout</button>
-          </div>
 
+      <!-- info modal -->
+      <div id="information" class="reveal" data-reveal>
+        <div id="profile">
+          <div id="user">
+          </div>
+          <div id="profileInfo">
+            <div id="profileImg">
+            </div>
+            <div id="profileDetails">
+              <div id="email">
+              </div>
+              <div id="product">
+              </div>
+              <div><sub>Open means a free spotify account.</sub>
+              </div>
+              <button type="button" data-close id="logout" class="button">Logout</button>
+            </div>
+          </div>
+          <hr />
         </div>
         <div id="about">
-          put info about github project here
+          <h4>About the Project</h4>
+          <p>
+            This is a personal project that is no way sponsered or endorsed by Spotify. No user information is retained by this project.
+          </p>
+          <p>
+            Sometimes the album art shown will not match exactly with the Spotify player, this because of the way the data is fetched through the Spotify API.
+          </p>
+          <div class="project-details">
+            To see this projects source code visit: <br />
+            <a href="https://github.com/massivelines/fullscreen-album-art-for-spotify">
+              https://github.com/massivelines/fullscreen-album-art-for-spotify</a>
+          </div>
+          <div class="project-details">
+            To report an issue or suggetion visit: <br />
+            <a href="https://github.com/massivelines/fullscreen-album-art-for-spotify/issues">
+              https://github.com/massivelines/fullscreen-album-art-for-spotify/issues</a>
+          </div>
+
+
+
         </div>
         <button class="close-button" data-close aria-label="Close modal" type="button">
+
     <span aria-hidden="true">&times;</span>
   </button>
       </div>
@@ -87,6 +130,7 @@
 
   <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.js"></script>
   <script src="https://rawgit.com/DrewDahlman/Mason/master/dist/mason.js"></script>
+  <script src="https://login-node-for-spotify.herokuapp.com/spotifyLogin.js"></script>
   <!-- <script src="https://unpkg.com/packery@2/dist/packery.pkgd.js"></script> -->
   <!-- <script src="js/mason.js"></script> -->
   <script src="js/app.js"></script>
