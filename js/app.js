@@ -398,6 +398,7 @@ function main() {
         }).done(function() {
 
           // starts getCurrentAlbum art with interval and fades it in
+          // TEMP: Change for testing, turns off full art
           getCurrentAlbum();
           $('#cover_background').css('opacity', 1);
 
@@ -488,8 +489,8 @@ function main() {
       resizeTimer = setTimeout(function () {
         console.log('resizeTimer');
         // TODO setup new fuctions from append and following to call when resized
-        // currentWindow();
-        // buildGrid();
+        currentWindow();
+        buildGrid();
       }, 1000)
     })
 
