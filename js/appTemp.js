@@ -48,33 +48,33 @@ function main() {
 
 
   backgroundArt();
-  profile();
-
-  function profile() {
-
-    $.ajax({
-      url: 'https://api.spotify.com/v1/me',
-      headers: {
-        'Authorization': 'Bearer ' + access_token
-      },
-      success: function(response) {
-        var user = {
-          name: response.display_name,
-          email: response.email,
-          profileImg: response.images["0"].url,
-          product: response.product
-        };
-        $('#profileImg').html('<img src="' + user.profileImg + '">');
-        $('#user').html('<h1>Logged in as ' + user.name + '</h1>');
-        $('#email').text('Email: ' + user.email);
-        $('#product').text('Account Type: ' + user.product);
-      },
-      error: function(response) {
-        console.log('profile');
-        console.log(response);
-      }
-    });
-  } // end of profile --------------------------------------------------
+  // profile();
+  //
+  // function profile() {
+  //
+  //   $.ajax({
+  //     url: 'https://api.spotify.com/v1/me',
+  //     headers: {
+  //       'Authorization': 'Bearer ' + access_token
+  //     },
+  //     success: function(response) {
+  //       var user = {
+  //         name: response.display_name,
+  //         email: response.email,
+  //         profileImg: response.images["0"].url,
+  //         product: response.product
+  //       };
+  //       $('#profileImg').html('<img src="' + user.profileImg + '">');
+  //       $('#user').html('<h1>Logged in as ' + user.name + '</h1>');
+  //       $('#email').text('Email: ' + user.email);
+  //       $('#product').text('Account Type: ' + user.product);
+  //     },
+  //     error: function(response) {
+  //       console.log('profile');
+  //       console.log(response);
+  //     }
+  //   });
+  // } // end of profile --------------------------------------------------
 
 
   // TODO if playing, get device, and same info
@@ -84,79 +84,79 @@ function main() {
 
 
   //holder to check if art needs to change
-  var holdAlbumImg = null;
-
-  function getCurrentAlbum() {
-    var refresh;
-
-    function refreshCurrentAlbum() {
-      $.ajax({
-        url: 'https://api.spotify.com/v1/me/player/',
-        headers: {
-          'Authorization': 'Bearer ' + access_token
-        },
-        success: function(response) {
-
-          // if a commercial is on
-          if (response.item == null) {
-            commercial = true;
-            $('#cover_background').css('opacity', 0);
-            $('#track').html('');
-            $('#artist').html('');
-            $('#album').html('');
-            // else get album art
-          } else {
-            // fade in to cover from commercial and toggle track-details visiblity
-            if ($('#cover_background').css('opacity') == 0) {
-              $('#cover_background').css('opacity', 1);
-              commercial = false;
-            }
-            var playing = {
-              artist: response.item.album.artists["0"].name,
-              album: response.item.album.name,
-              track: response.item.name,
-              albumImg: response.item.album.images["0"].url,
-              artistURL: response.item.artists["0"].external_urls.spotify,
-              albumURL: response.item.album.external_urls.spotify,
-              trackURL: response.item.external_urls.spotify
-            };
-
-            // if changing to new cover
-            if (holdAlbumImg != playing.albumImg) {
-
-              // if there was a previous cover
-              if (holdAlbumImg) {
-                $('#previousCover').css("background-image", "url('" + holdAlbumImg + "')");
-              }
-
-              $('#cover').css("background-image", "url('" + playing.albumImg + "')");
-              $('#track').html('<a href=' + playing.trackURL + ' target="_blank">' + playing.track + '</a>');
-              $('#artist').html('<a href=' + playing.artistURL + ' target="_blank">' + playing.artist + '</a>');
-              $('#album').html('<a href=' + playing.albumURL + ' target="_blank">' + playing.album + '</a>');
-              holdAlbumImg = playing.albumImg;
-            }
-          }
-          refresh = setTimeout(refreshCurrentAlbum, 250);
-        },
-        error: function(response) {
-          if (response.status == 401) {
-            console.log('refreshCurrentAlbum == 401');
-            console.log(response);
-            spotify.refresh();
-            console.log('refresh token');
-            accessToken();
-            refreshCurrentAlbum();
-          } else {
-            console.log('refreshCurrentAlbum');
-            console.log(response);
-          }
-        }
-      });
-    }
-
-
-    refreshCurrentAlbum();
-  } // end of get getCurrentAlbum ------------------------------------------
+  // var holdAlbumImg = null;
+  //
+  // function getCurrentAlbum() {
+  //   var refresh;
+  //
+  //   function refreshCurrentAlbum() {
+  //     $.ajax({
+  //       url: 'https://api.spotify.com/v1/me/player/',
+  //       headers: {
+  //         'Authorization': 'Bearer ' + access_token
+  //       },
+  //       success: function(response) {
+  //
+  //         // if a commercial is on
+  //         if (response.item == null) {
+  //           commercial = true;
+  //           $('#cover_background').css('opacity', 0);
+  //           $('#track').html('');
+  //           $('#artist').html('');
+  //           $('#album').html('');
+  //           // else get album art
+  //         } else {
+  //           // fade in to cover from commercial and toggle track-details visiblity
+  //           if ($('#cover_background').css('opacity') == 0) {
+  //             $('#cover_background').css('opacity', 1);
+  //             commercial = false;
+  //           }
+  //           var playing = {
+  //             artist: response.item.album.artists["0"].name,
+  //             album: response.item.album.name,
+  //             track: response.item.name,
+  //             albumImg: response.item.album.images["0"].url,
+  //             artistURL: response.item.artists["0"].external_urls.spotify,
+  //             albumURL: response.item.album.external_urls.spotify,
+  //             trackURL: response.item.external_urls.spotify
+  //           };
+  //
+  //           // if changing to new cover
+  //           if (holdAlbumImg != playing.albumImg) {
+  //
+  //             // if there was a previous cover
+  //             if (holdAlbumImg) {
+  //               $('#previousCover').css("background-image", "url('" + holdAlbumImg + "')");
+  //             }
+  //
+  //             $('#cover').css("background-image", "url('" + playing.albumImg + "')");
+  //             $('#track').html('<a href=' + playing.trackURL + ' target="_blank">' + playing.track + '</a>');
+  //             $('#artist').html('<a href=' + playing.artistURL + ' target="_blank">' + playing.artist + '</a>');
+  //             $('#album').html('<a href=' + playing.albumURL + ' target="_blank">' + playing.album + '</a>');
+  //             holdAlbumImg = playing.albumImg;
+  //           }
+  //         }
+  //         refresh = setTimeout(refreshCurrentAlbum, 250);
+  //       },
+  //       error: function(response) {
+  //         if (response.status == 401) {
+  //           console.log('refreshCurrentAlbum == 401');
+  //           console.log(response);
+  //           spotify.refresh();
+  //           console.log('refresh token');
+  //           accessToken();
+  //           refreshCurrentAlbum();
+  //         } else {
+  //           console.log('refreshCurrentAlbum');
+  //           console.log(response);
+  //         }
+  //       }
+  //     });
+  //   }
+  //
+  //
+  //   refreshCurrentAlbum();
+  // } // end of get getCurrentAlbum ------------------------------------------
 
   // get user's top albums
   // save id's in array
@@ -346,16 +346,29 @@ function main() {
       columnSize = currentHeight / 6;
       numberOfColumns = Math.ceil(currentWidth / columnSize);
       console.log(numberOfColumns);
-      console.log(columnSize);
+      console.log(currentWidth);
       newWidth = columnSize * numberOfColumns;
       gridStyles = {
         'width': newWidth + 'px',
         'left': -random(0, (newWidth - currentWidth) / 2) + 'px'
       };
 
-      $('#container').css(gridStyles);
+      // $('#container').css(gridStyles);
     }
     currentWindow();
+    // var currentWidth = window.innerWidth;
+    // var currentHeight = window.innerHeight;
+    //
+    // var columnSize = currentHeight / 6;
+    // var numberOfColumns = Math.ceil(currentWidth / columnSize);
+    //
+    // var newWidth = columnSize * numberOfColumns;
+    // var gridStyles = {
+    //   'width': newWidth + 'px',
+    //   'left': -random(0, (newWidth - currentWidth) / 2) + 'px'
+    // };
+    //
+    // $('#container').css(gridStyles);
 
 
     function appendImages(callback) {
@@ -378,85 +391,13 @@ function main() {
       $('.grid').imagesLoaded()
         .done(function(instance) {
           buildGrid();
-        }).done(function() {
-          // randomizes the fade in on the grid items
-          var artDivs = $(".grid > div").get();
-          var artDivsLength = artDivs.length;
-
-          function opacityLoop() {
-            if (artDivsLength > 0) {
-              setTimeout(function() {
-                var loc = random(0, artDivsLength);
-                $(artDivs[loc]).css('opacity', 1);
-                artDivs.splice(loc, 1);
-                artDivsLength--;
-                opacityLoop();
-              }, 20);
-            }
-          }
-          opacityLoop();
-        }).done(function() {
-
-          // starts getCurrentAlbum art with interval and fades it in
-          // getCurrentAlbum();
-          // $('#cover_background').css('opacity', 1);
-
-
-        }).done(function() {
-          // TODO when commercial play dont show details div maybe done
-
-          // adds a timer that shows the track info on a mousemove and delays it until all art it loaded
-          setTimeout(function() {
-
-            var timer = null;
-            $(document).mousemove(function() {
-              // console.log(commercial);
-              if (commercial == false) {
-                clearTimeout(timer);
-                $('#track-details').css('opacity', 1);
-                $('#track-text').css('opacity', 1);
-                $('#spotify').css('opacity', 1);
-                i = setTimeout(function() {
-                  $('#track-details').css('opacity', 0);
-                  $('#track-text').css('opacity', 0);
-                  $('#spotify').css('opacity', 0.4);
-                }, 10000);
-              }
-            }).mouseleave(function() {
-              clearTimeout(timer);
-              $('#track-details').css('opacity', 0);
-              $('#track-text').css('opacity', 0);
-              $('#spotify').css('opacity', 0.4);
-            });
-
-          }, 5000);
-
-        });
+        })
     });
 
-    var mason;
-    var columnBreakPointsWidth = [320,375,568,667,1024,1440,1680,1920,2560]
-    var columnBreakPointsHeight = [320,375,568,667,768,900,1050,1080,1440]
-    var columnBreakPointsArr=[];
-    var masonColumnArr = [];
-
-    for (var i = 0; i < columnBreakPointsHeight.length; i++) {
-      columnBreakPointsArr[i] = Math.floor(columnBreakPointsHeight[i] / 6)+1;
-    }
-
-    for (var j = 0; j < columnBreakPointsArr.length; j++) {
-      if (j==0) {
-        masonColumnArr.push([0, columnBreakPointsWidth[j] ,columnBreakPointsArr[j]]);
-      } else {
-        masonColumnArr.push([columnBreakPointsWidth[j-1], columnBreakPointsWidth[j] ,columnBreakPointsArr[j]]);
-      }
-
-    }
-
-    console.log(masonColumnArr);
 
 
     function buildGrid() {
+      var mason;
 
       mason = $(".grid").mason({
           itemSelector: '.grid-item',
@@ -466,14 +407,18 @@ function main() {
             [1, 1],
           ],
           columns: [
-            [0, 3000, numberOfColumns],
+            [0, 3000, 10],
+            // [0, 3000, 10],
+            // [0, 3000, 10],
+            // [0, 3000, 10],
+            // [0, 3000, 10],
           ],
           filler: {
             itemSelector: '.fillers',
             filler_class: 'mason_filler',
             keepDataAndEvents: true
           },
-          layout: 'fluid',
+          layout: 'fixed',
           gutter: 2
         });
         $('#container').css('top', -random(0, $('.grid').height() - currentHeight) / 2 + 'px');
@@ -483,15 +428,14 @@ function main() {
     $(window).on('resize', function () {
       currentWindow();
       $('#container').css('top', -random(0, $('.grid').height() - currentHeight) / 2 + 'px');
-
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(function () {
-        console.log('resizeTimer');
-        // TODO setup new fuctions from append and following to call when resized
-        // currentWindow();
-        // buildGrid();
-      }, 1000)
-    })
+      // clearTimeout(resizeTimer);
+      // resizeTimer = setTimeout(function () {
+      //   console.log('resizeTimer');
+      //   currentWindow();
+      //   $('#container').css('top', -random(0, $('.grid').height() - currentHeight) / 2 + 'px');
+      //
+      // }, 1000)
+    });
 
   } // end of output ------------------------------------------------
 

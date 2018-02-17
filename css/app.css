@@ -44,18 +44,19 @@
 .grid-item, .mason_filler {
   position: relative;
   float: left;
+  /* TODO: change to 0  */
   opacity: 0;
   transition: opacity 1s ease-in-out;
   filter: grayscale(95%) brightness(35%);
 }
 
 .grid-item {
-  /*filter: grayscale(100%) brightness(30%);*/
+  filter: grayscale(100%) brightness(30%);
 }
 
 .mason_filler {
-  /*filter: grayscale(100%) brightness(30%);*/
-  /*background-color: green;*/
+  filter: grayscale(100%) brightness(30%);
+  background-color: green;
 }
 
 
