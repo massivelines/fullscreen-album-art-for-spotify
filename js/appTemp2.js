@@ -398,8 +398,8 @@ function main() {
         }).done(function() {
 
           // starts getCurrentAlbum art with interval and fades it in
-          getCurrentAlbum();
-          $('#cover_background').css('opacity', 1);
+          // getCurrentAlbum();
+          // $('#cover_background').css('opacity', 1);
 
 
         }).done(function() {
