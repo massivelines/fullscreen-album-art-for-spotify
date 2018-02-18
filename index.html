@@ -12,7 +12,7 @@
 
 </head>
 
-<body>
+<body data-resize>
 
   <!-- login modal -->
   <div id="login" class="callout">
@@ -41,7 +41,9 @@
     <div id="container">
 
       <!-- background artwork -->
-      <div class="grid"></div>
+      <div id="test">
+        <div class="grid"></div>
+      </div>
 
       <!-- cover artwork -->
       <div id="cover_container">
@@ -71,6 +73,7 @@
         </div> -->
       </div>
 
+      <!-- TODO: hide scrollbar when opened -->
       <!-- info modal -->
       <div id="information" class="reveal" data-reveal>
         <div id="profile">
@@ -131,8 +134,7 @@
   <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.js"></script>
   <script src="https://rawgit.com/DrewDahlman/Mason/master/dist/mason.js"></script>
   <script src="https://login-node-for-spotify.herokuapp.com/spotifyLogin.js"></script>
-  <!-- <script src="https://unpkg.com/packery@2/dist/packery.pkgd.js"></script> -->
-  <!-- <script src="js/mason.js"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.4.3/js/plugins/foundation.util.triggers.js"></script>
   <script src="js/app.js"></script>
 </body>
 
