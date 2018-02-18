@@ -340,33 +340,26 @@ function main() {
       return Math.floor(Math.random() * (max - min)) + min;
     }
 
-    function currentWindow() {
-      currentWidth = window.innerWidth;
-      currentHeight = window.innerHeight;
-      columnSize = currentHeight / 6;
-      numberOfColumns = Math.ceil(currentWidth / columnSize);
-      console.log(numberOfColumns);
-      console.log(columnSize);
-      newWidth = columnSize * numberOfColumns;
-      gridStyles = {
-        'width': newWidth + 'px',
-        'left': -random(0, (newWidth - currentWidth) / 2) + 'px'
-      };
+    var columnBreaks = [
+      [0, 480, 8],
+      [480, 780, 10],
+      [780, 1080, 12],
+      [1080, 1320, 14],
+      [1320, 1680, 16]
+    ];
 
-      $('#container').css(gridStyles);
-    }
-    currentWindow();
+    // get #container size
+
+    // console.log(gridSize);
 
 
     function appendImages(callback) {
       var fillers = multiTrackImg.splice(0, Math.floor(multiTrackImg.length / 2));
-
-      // appends images
       $.each(multiTrackImg, function() {
-        $('.grid').append('<div class="grid-item" style="background-image: url(' + this + '); background-repeat: no-repeat; background-size:cover;"></div>');
+        $('.grid').append('<div class="grid-item"><div class="grid-background" style="background-image: url(' + this + '); background-repeat: no-repeat; background-size:cover;"></div></div>');
       });
       $.each(fillers, function() {
-        $('.hidden').append('<div class="fillers" style="background-image: url(' + this + '); background-repeat: no-repeat; background-size:cover;"></div>');
+        $('.hidden').append('<div class="fillers"><div class="grid-background" style="background-image: url(' + this + '); background-repeat: no-repeat; background-size:cover;"></div></div>');
       });
 
       callback();
@@ -377,10 +370,28 @@ function main() {
 
       $('.grid').imagesLoaded()
         .done(function(instance) {
-          buildGrid();
+          // build grid
+          var mason = $(".grid").mason({
+            itemSelector: '.grid-item',
+            ratio: 1,
+            sizes: [
+              [3, 3],
+              [2, 2],
+              [1, 1]
+            ],
+            columns: columnBreaks,
+            filler: {
+              itemSelector: '.fillers',
+              filler_class: 'mason_filler',
+              keepDataAndEvents: true
+            },
+            layout: 'fluid',
+            gutter: 2
+          });
         }).done(function() {
+
           // randomizes the fade in on the grid items
-          var artDivs = $(".grid > div").get();
+          var artDivs = $(".grid-background").get();
           var artDivsLength = artDivs.length;
 
           function opacityLoop() {
@@ -403,108 +414,20 @@ function main() {
           $('#cover_background').css('opacity', 1);
 
 
-        }).done(function() {
-          // TODO when commercial play dont show details div maybe done
-
-          // adds a timer that shows the track info on a mousemove and delays it until all art it loaded
-          setTimeout(function() {
-
-            var timer = null;
-            $(document).mousemove(function() {
-              // console.log(commercial);
-              if (commercial == false) {
-                clearTimeout(timer);
-                $('#track-details').css('opacity', 1);
-                $('#track-text').css('opacity', 1);
-                $('#spotify').css('opacity', 1);
-                i = setTimeout(function() {
-                  $('#track-details').css('opacity', 0);
-                  $('#track-text').css('opacity', 0);
-                  $('#spotify').css('opacity', 0.4);
-                }, 10000);
-              }
-            }).mouseleave(function() {
-              clearTimeout(timer);
-              $('#track-details').css('opacity', 0);
-              $('#track-text').css('opacity', 0);
-              $('#spotify').css('opacity', 0.4);
-            });
-
-          }, 5000);
-
         });
     });
 
-    var mason;
-    var columnBreakPointsWidth = [320,375,568,667,1024,1440,1680,1920,2560]
-    var columnBreakPointsHeight = [320,375,568,667,768,900,1050,1080,1440]
-    var columnBreakPointsArr=[];
-    var masonColumnArr = [];
 
-    for (var i = 0; i < columnBreakPointsHeight.length; i++) {
-      columnBreakPointsArr[i] = Math.floor(columnBreakPointsHeight[i] / 6)+1;
-    }
+    // use foundation throttle and deboucer
+    $("body").on("resizeme.zf.trigger", function() {
+      // $('#container').css('top', -random(0, $('.grid').height() - currentHeight) / 2 + 'px');
+    });
 
-    for (var j = 0; j < columnBreakPointsArr.length; j++) {
-      if (j==0) {
-        masonColumnArr.push([0, columnBreakPointsWidth[j] ,columnBreakPointsArr[j]]);
-      } else {
-        masonColumnArr.push([columnBreakPointsWidth[j-1], columnBreakPointsWidth[j] ,columnBreakPointsArr[j]]);
-      }
-
-    }
-
-    console.log(masonColumnArr);
-
-
-    function buildGrid() {
-
-      mason = $(".grid").mason({
-          itemSelector: '.grid-item',
-          ratio: 1,
-          sizes: [
-            [2, 2],
-            [1, 1],
-          ],
-          columns: [
-            [0, 3000, numberOfColumns],
-          ],
-          filler: {
-            itemSelector: '.fillers',
-            filler_class: 'mason_filler',
-            keepDataAndEvents: true
-          },
-          layout: 'fluid',
-          gutter: 2
-        });
-        $('#container').css('top', -random(0, $('.grid').height() - currentHeight) / 2 + 'px');
-    }
-
-    var resizeTimer;
-    $(window).on('resize', function () {
-      currentWindow();
-      $('#container').css('top', -random(0, $('.grid').height() - currentHeight) / 2 + 'px');
-
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(function () {
-        console.log('resizeTimer');
-        // TODO setup new fuctions from append and following to call when resized
-        currentWindow();
-        buildGrid();
-      }, 1000)
-    })
 
   } // end of output ------------------------------------------------
 
 
 
 } // end of main -------------------------------------------------
-
-
-
-
-
-
-
 
 $(document).foundation();
